@@ -1,0 +1,18 @@
+{
+    "form": { "maxWidth": "400px" },
+    "children": [
+        {
+            "name": "title",
+            "label": "Título",
+            "help": "Máximo 50 letras",
+            "rules": [
+                {
+                    "required": true,
+                    "message": "El título del libro es requerido"
+                }
+            ],
+            "render": "inputText",
+            "props": { "maxLength": 20 }
+        }
+    ]
+}

@@ -1,0 +1,42 @@
+{
+    "form": { "maxWidth": "400px" },
+    "children": [
+        {
+            "name": "title",
+            "label": "Título Avanzado",
+            "help": "Máximo 100 letras",
+            "rules": [
+                {
+                    "required": true,
+                    "message": "El título del libro es requerido"
+                }
+            ],
+            "render": "inputText",
+            "props": { "maxLength": 20 }
+        },
+        {
+            "name": "description",
+            "label": "Descripción",
+            "help": "Máximo 500 letras",
+            "rules": [
+                {
+                    "required": true,
+                    "message": "La descripción es requerida"
+                }
+            ],
+            "render": "inputText",
+            "props": { "maxLength": 20 }
+        },
+        {
+            "name": "rate",
+            "label": "Calificación",
+            "rules": [
+                {
+                    "required": true,
+                    "message": "Dale una calificación"
+                }
+            ],
+            "render": "rate"
+        }
+    ]
+}
