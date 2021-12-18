@@ -1,21 +1,21 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
+import { InvoiceType } from 'types/invoice/invoiceType'
 import { connection } from '../connection'
 
 export interface nvoiceTypeStore {
-    list: Partial<nvoiceType>[]
+    list: Partial<InvoiceType>[]
     getList: () => Promise<boolean>
     getById: (id: string) => Promise<boolean>
     isLoading: boolean
-    item: nvoiceType | {} | any
-    createUpdate: (data: Partial<nvoiceType>) => Promise<boolean>
+    item: InvoiceType | {} | any
+    createUpdate: (data: Partial<InvoiceType>) => Promise<boolean>
     deleteById: (id: string) => Promise<boolean>
     openEditor: boolean
     sort: { field: string; sorted: number }
 }
 
 const nvoiceTypeStore = () =>
-    observable<nvoiceTypeStore>({
+    <nvoiceTypeStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -23,26 +23,13 @@ const nvoiceTypeStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList() {
             this.isLoading = true
-            const list: nvoiceType[] = await connection.nvoiceType(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
-            )
-            console.log('product storage ', list, ' orden ', this.sort)
+            const list: InvoiceType[] = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
-            const data: nvoiceType[] = await connection.nvoiceType(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
-            )
-
+            const data: InvoiceType[] = await connection({}, 'POST', '/_PATH')
             if (data) this.item = data[0]
             return true
         },
@@ -51,15 +38,13 @@ const nvoiceTypeStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.nvoiceType(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.nvoiceType({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(nvoiceTypeStore())

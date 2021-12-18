@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
+import { FiscalCategoryType } from 'types/fiscalCategory'
 import { connection } from '../connection'
 
 export interface IFiscalCategoryStore {
@@ -15,7 +15,7 @@ export interface IFiscalCategoryStore {
 }
 
 const FiscalCategoryStore = () =>
-    observable<IFiscalCategoryStore>({
+    <IFiscalCategoryStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -23,26 +23,21 @@ const FiscalCategoryStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList() {
             this.isLoading = true
-            const list: FiscalCategoryType[] = await connection.fiscalCategory(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
+            const list: FiscalCategoryType[] = await connection(
+                {},
+                'POST',
+                '/_PATH'
             )
-            console.log('product storage ', list, ' orden ', this.sort)
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
-            const data: FiscalCategoryType[] = await connection.fiscalCategory(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
+            const data: FiscalCategoryType[] = await connection(
+                {},
+                'POST',
+                '/_PATH'
             )
-
             if (data) this.item = data[0]
             return true
         },
@@ -51,15 +46,13 @@ const FiscalCategoryStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.fiscalCategory(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.fiscalCategory({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(FiscalCategoryStore())

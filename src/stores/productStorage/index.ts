@@ -1,5 +1,4 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
 import { ProductStorage } from 'types/product/productStore'
 
@@ -16,7 +15,7 @@ export interface ProductStorageStore {
 }
 
 const ProductStorageStore = () =>
-    observable<ProductStorageStore>({
+    <ProductStorageStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -24,26 +23,21 @@ const ProductStorageStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList() {
             this.isLoading = true
-            const list: ProductStorage[] = await connection.productStorage(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
+            const list: ProductStorage[] = await connection(
+                {},
+                'POST',
+                '/_PATH'
             )
-            console.log('product storage ', list, ' orden ', this.sort)
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
-            const data: ProductStorage[] = await connection.productStorage(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
+            const data: ProductStorage[] = await connection(
+                {},
+                'POST',
+                '/_PATH'
             )
-
             if (data) this.item = data[0]
             return true
         },
@@ -52,15 +46,13 @@ const ProductStorageStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.productStorage(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.productStorage({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(ProductStorageStore())

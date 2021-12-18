@@ -1,5 +1,4 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
 import { ConceptType } from 'types/conceptType'
 
@@ -16,7 +15,7 @@ export interface ConceptTypeStore {
 }
 
 const ConceptTypeStore = () =>
-    observable<ConceptTypeStore>({
+    <ConceptTypeStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -24,23 +23,16 @@ const ConceptTypeStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList(filter) {
             this.isLoading = true
-            const list: ConceptType[] = await connection.conceptType(
-                { filter: filter ? filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
-            )
+            const list: ConceptType[] = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             this.list = list
             return list
         },
         async getById(id) {
-            const data: ConceptType[] = await connection.conceptType(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
+            const data: ConceptType[] = await connection(
+                { id },
+                'POST',
+                '/_PATH'
             )
 
             if (data) this.item = data[0]
@@ -52,13 +44,13 @@ const ConceptTypeStore = () =>
                 data: value,
             }
 
-            const data = await connection.conceptType(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.conceptType({ _id: id }, 'DELETE')
+            const data = await connection({ id }, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(ConceptTypeStore())

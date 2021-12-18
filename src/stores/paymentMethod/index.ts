@@ -1,5 +1,4 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
 import { PaymentMethod } from 'types/paymentMethod'
 
@@ -16,7 +15,7 @@ export interface PaymentMethodStore {
 }
 
 const PaymentMethodStore = () =>
-    observable<PaymentMethodStore>({
+    <PaymentMethodStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -24,26 +23,13 @@ const PaymentMethodStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList() {
             this.isLoading = true
-            const list: PaymentMethod[] = await connection.paymentMethod(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
-            )
-            console.log('product storage ', list, ' orden ', this.sort)
+            const list: PaymentMethod[] = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
-            const data: PaymentMethod[] = await connection.paymentMethod(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
-            )
-
+            const data: PaymentMethod[] = await connection({}, 'POST', '/_PATH')
             if (data) this.item = data[0]
             return true
         },
@@ -52,15 +38,13 @@ const PaymentMethodStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.paymentMethod(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.paymentMethod({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(PaymentMethodStore())

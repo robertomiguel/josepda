@@ -1,5 +1,4 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
 import { ProductCategory } from 'types/product/productCategory'
 
@@ -16,7 +15,7 @@ export interface ProductCategoryStore {
 }
 
 const ProductCategoryStore = () =>
-    observable<ProductCategoryStore>({
+    <ProductCategoryStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -24,43 +23,32 @@ const ProductCategoryStore = () =>
         sort: { field: 'name', sorted: 1 },
         async getList() {
             this.isLoading = true
-            const list: ProductCategory[] = await connection.productCategory(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
+            const list: ProductCategory[] = await connection(
+                {},
+                'POST',
+                '/_PATH'
             )
-            console.log('product category ', list)
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
-            const data: ProductCategory[] = await connection.productCategory(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
+            const data: ProductCategory[] = await connection(
+                {},
+                'POST',
+                '/_PATH'
             )
-
             if (data) this.item = data[0]
             return true
         },
         async createUpdate(value) {
-            await connection.productCategory(
-                {
-                    filter: { _id: this.item._id },
-                    data: value,
-                },
-                'PUT'
-            )
+            await connection({}, 'POST', '/_PATH')
             return true
         },
         async deleteById(id) {
-            await connection.productCategory({ _id: id }, 'DELETE')
+            await connection({}, 'POST', '/_PATH')
             return true
         },
-    })
+    }
 
 export default createContext(ProductCategoryStore())

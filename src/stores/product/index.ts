@@ -1,13 +1,10 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
-import { TablePaginationConfig } from 'antd'
 import { connection } from '../connection'
 import { Product } from 'types/product/product'
 import { ConceptType } from 'types/conceptType'
 
 export interface ProductStore {
     list: Partial<Product>[]
-    pagination: TablePaginationConfig
     select: string
     sort: { field: string; sorted: number }
     filter: any
@@ -27,7 +24,7 @@ interface IGetList {
 }
 
 const ProductStore = () =>
-    observable<ProductStore>({
+    <ProductStore>{
         list: [],
         pagination: {
             total: 0,
@@ -43,50 +40,26 @@ const ProductStore = () =>
         concept: {},
         async getList(filter) {
             this.isLoading = true
-            const list: IGetList = await connection.product(
-                {
-                    filter: filter ? filter : {},
-                    limit: this.pagination.pageSize,
-                    page: this.pagination.current,
-                    select: this.select,
-                    sort: { [this.sort.field]: this.sort.sorted },
-                },
-                'POST'
-            )
-            this.pagination.total = list.totalDocs
+            const list: IGetList = await connection({}, 'POST', '/_PATH')
             this.list = list.docs
             this.isLoading = false
             return true
         },
         async getById(id) {
             this.isLoading = true
-            const data: IGetList = await connection.product(
-                {
-                    filter: { _id: id },
-                    limit: 1,
-                    page: 1,
-                    select: '',
-                    sort: { [this.sort.field]: this.sort.sorted },
-                },
-                'POST'
-            )
+            const data: IGetList = await connection({}, 'POST', '/_PATH')
             if (data.docs) this.item = data.docs[0]
             this.isLoading = false
             return true
         },
         async createUpdate(data: Partial<Product>) {
-            const res = await connection.product(
-                { filter: { _id: this.item._id }, data },
-                'PUT'
-            )
-            console.log('res: ', res)
+            const res = await connection({}, 'POST', '/_PATH')
             return true
         },
         async deleteById(id) {
-            const res = await connection.product({ _id: id }, 'DELETE')
-            console.log('res: ', res)
+            const res = await connection({}, 'POST', '/_PATH')
             return true
         },
-    })
+    }
 
 export default createContext(ProductStore())

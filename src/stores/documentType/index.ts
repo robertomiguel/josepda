@@ -1,5 +1,4 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
 
 export interface DocumentTypeStore {
@@ -15,7 +14,7 @@ export interface DocumentTypeStore {
 }
 
 const DocumentTypeStore = () =>
-    observable<DocumentTypeStore>({
+    <DocumentTypeStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -23,25 +22,13 @@ const DocumentTypeStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList() {
             this.isLoading = true
-            const list: DocumentType[] = await connection.documentType(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
-            )
-            console.log('product storage ', list, ' orden ', this.sort)
+            const list: DocumentType[] = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
-            const data: DocumentType[] = await connection.documentType(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
-            )
+            const data: DocumentType[] = await connection({}, 'POST', '/_PATH')
 
             if (data) this.item = data[0]
             return true
@@ -51,15 +38,13 @@ const DocumentTypeStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.documentType(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.documentType({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(DocumentTypeStore())

@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
+import { UserGroup } from 'types/user'
 import { connection } from '../connection'
 
 export interface UserGroupStore {
@@ -15,7 +15,7 @@ export interface UserGroupStore {
 }
 
 const UserGroupStore = () =>
-    observable<UserGroupStore>({
+    <UserGroupStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -23,26 +23,13 @@ const UserGroupStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList() {
             this.isLoading = true
-            const list: UserGroup[] = await connection.userGroup(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
-            )
-            console.log('product storage ', list, ' orden ', this.sort)
+            const list: UserGroup[] = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
-            const data: UserGroup[] = await connection.userGroup(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
-            )
-
+            const data: UserGroup[] = await connection({}, 'POST', '/_PATH')
             if (data) this.item = data[0]
             return true
         },
@@ -51,15 +38,13 @@ const UserGroupStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.userGroup(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.userGroup({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(UserGroupStore())

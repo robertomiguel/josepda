@@ -1,6 +1,7 @@
 import axios, { Method } from 'axios'
 
-const PUBLIC_URL = process.env.NEXT_PUBLIC_LOCALHOST || 'https://bookstore-eta.vercel.app' // 'http://localhost:3000'
+const PUBLIC_URL =
+    process.env.NEXT_PUBLIC_LOCALHOST || 'https://josepda-eta.vercel.app' // 'http://localhost:3000'
 
 export const BASE_URL = `${PUBLIC_URL}/api/v1`
 
@@ -14,7 +15,7 @@ export const connection = async (
     method: Method,
     routePath: string
 ) =>
-(
+    (
         await axios({
             method,
             url: `${BASE_URL + routePath}`,

@@ -1,5 +1,4 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
 import { LoginCredential, User } from 'types/user'
 
@@ -21,7 +20,7 @@ export interface UserStore {
 }
 
 const UserStore = () =>
-    observable<UserStore>({
+    <UserStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -30,27 +29,14 @@ const UserStore = () =>
         isLogged: false,
         async getList() {
             this.isLoading = true
-            const list: User[] = await connection.user(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
-            )
-            console.log('user ', list, ' orden ', this.sort)
+            const list: User[] = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             this.list = list
             return true
         },
         user: {},
         async getById(id) {
-            const data: User[] = await connection.user(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
-            )
-
+            const data: User[] = await connection({}, 'POST', '/_PATH')
             if (data) this.item = data[0]
             return true
         },
@@ -59,18 +45,15 @@ const UserStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.user(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.user({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async login(credential: LoginCredential) {
-            const user = await connection.login(credential)
-
+            const user = await connection({}, 'POST', '/_PATH')
             if (user) {
                 this.user = user
                 this.isLogged = true
@@ -82,14 +65,12 @@ const UserStore = () =>
             return true
         },
         async logout() {
-            await connection.logout()
+            await connection({}, 'POST', '/_PATH')
             this.isLogged = false
             return true
         },
         async checkSession() {
-            const user = await connection.checkSession()
-            console.log('sesion user: ', user)
-
+            const user = await connection({}, 'POST', '/_PATH')
             if (user) {
                 this.user = user
                 this.isLogged = true
@@ -99,6 +80,6 @@ const UserStore = () =>
                 return true
             }
         },
-    })
+    }
 
 export default createContext(UserStore())

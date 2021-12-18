@@ -1,5 +1,4 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
 import { PointOfSale } from 'types/pointOfSale'
 
@@ -16,7 +15,7 @@ export interface PointOfSaleStore {
 }
 
 const PointOfSaleStore = () =>
-    observable<PointOfSaleStore>({
+    <PointOfSaleStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -24,26 +23,13 @@ const PointOfSaleStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList() {
             this.isLoading = true
-            const list: PointOfSale[] = await connection.pointOfSale(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
-            )
-            console.log('product storage ', list, ' orden ', this.sort)
+            const list: PointOfSale[] = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
-            const data: PointOfSale[] = await connection.pointOfSale(
-                {
-                    filter: { _id: id },
-                    options: {
-                        limit: 1,
-                    },
-                },
-                'POST'
-            )
-
+            const data: PointOfSale[] = await connection({}, 'POST', '/_PATH')
             if (data) this.item = data[0]
             return true
         },
@@ -52,15 +38,13 @@ const PointOfSaleStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.pointOfSale(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.pointOfSale({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(PointOfSaleStore())

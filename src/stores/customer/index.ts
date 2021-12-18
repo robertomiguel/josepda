@@ -1,7 +1,6 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
-import { TablePaginationConfig } from 'antd'
+import { Customer } from 'types/customer'
 
 export interface CustomerStore {
     list: Partial<Customer>[]
@@ -13,7 +12,6 @@ export interface CustomerStore {
     deleteById: (id: string) => Promise<boolean>
     openEditor: boolean
     sort: { field: string; sorted: number }
-    pagination: TablePaginationConfig
     select: string
     filter: any
 }
@@ -23,47 +21,23 @@ interface GetList {
 }
 
 const CustomerStore = () =>
-    observable<CustomerStore>({
+    <CustomerStore>{
         list: [],
         isLoading: false,
         item: {},
         openEditor: false,
         sort: { field: 'name', sorted: 1 }, // order default
-        pagination: {
-            total: 0,
-            current: 1,
-            pageSize: 10,
-        },
         filter: {},
         select: '',
         async getList() {
             this.isLoading = true
-            const list: GetList = await connection.customer(
-                {
-                    filter: this.filter,
-                    limit: this.pagination.pageSize,
-                    page: this.pagination.current,
-                    select: this.select,
-                    sort: { [this.sort.field]: this.sort.sorted },
-                },
-                'POST'
-            )
-            this.pagination.total = list.totalDocs
+            const list: GetList = await connection({}, 'POST', '/_PATH')
             this.list = list.docs
             this.isLoading = false
             return true
         },
         async getById(id) {
-            const data: GetList = await connection.customer(
-                {
-                    filter: { _id: id },
-                    limit: 1,
-                    page: 1,
-                    select: '',
-                    sort: { [this.sort.field]: this.sort.sorted },
-                },
-                'POST'
-            )
+            const data: GetList = await connection({}, 'POST', '/_PATH')
             if (data.docs) this.item = data.docs[0]
             return true
         },
@@ -72,13 +46,13 @@ const CustomerStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            const data = await connection.customer(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.customer({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(CustomerStore())

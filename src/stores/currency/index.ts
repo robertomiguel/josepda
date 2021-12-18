@@ -1,5 +1,4 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from '../connection'
 import { Currency } from 'types/currency'
 
@@ -16,7 +15,7 @@ export interface CurrencyStore {
 }
 
 const CurrencyStore = () =>
-    observable<CurrencyStore>({
+    <CurrencyStore>{
         list: [],
         isLoading: false,
         item: {},
@@ -24,23 +23,14 @@ const CurrencyStore = () =>
         sort: { field: 'name', sorted: 1 }, // order default
         async getList() {
             this.isLoading = true
-            const list: Currency[] = await connection.currency(
-                { filter: {}, sort: { [this.sort.field]: this.sort.sorted } },
-                'POST'
-            )
-            console.log('product storage ', list, ' orden ', this.sort)
+            const list: Currency[] = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             this.list = list
             return true
         },
         async getById(id) {
             this.isLoading = true
-            const data: Currency = await connection.currency(
-                {
-                    byId: id,
-                },
-                'POST'
-            )
+            const data: Currency = await connection({}, 'POST', '/_PATH')
             this.isLoading = false
             return data
         },
@@ -49,15 +39,13 @@ const CurrencyStore = () =>
                 filter: this.item._id ? { _id: this.item._id } : {},
                 data: value,
             }
-            console.log('se envía q: ', q)
-
-            const data = await connection.currency(q, 'PUT')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
         async deleteById(id) {
-            const data = await connection.currency({ _id: id }, 'DELETE')
+            const data = await connection({}, 'POST', '/_PATH')
             return data.ok === 1 ? true : false
         },
-    })
+    }
 
 export default createContext(CurrencyStore())

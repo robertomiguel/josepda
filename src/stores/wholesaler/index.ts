@@ -1,13 +1,10 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
-import { TablePaginationConfig } from 'antd'
 import { connection } from '../connection'
-import { IConceptType } from 'stores/conceptType'
 import { Wholesaler } from 'types/wholesaler'
+import { ConceptType } from 'types/conceptType'
 
 export interface WholesalerStore {
     list: Partial<Wholesaler>[]
-    pagination: TablePaginationConfig
     select: string
     sort: { field: string; sorted: number }
     filter: any
@@ -18,7 +15,7 @@ export interface WholesalerStore {
     isLoading: boolean
     openEditor: boolean
     item: Wholesaler | {} | any
-    concept: IConceptType | {} | any
+    concept: ConceptType | {} | any
 }
 
 interface IGetList {
@@ -27,13 +24,8 @@ interface IGetList {
 }
 
 const WholesalerStore = () =>
-    observable<WholesalerStore>({
+    <WholesalerStore>{
         list: [],
-        pagination: {
-            total: 0,
-            current: 1,
-            pageSize: 10,
-        },
         filter: {},
         sort: { field: 'name', sorted: 1 },
         select: '',
@@ -43,50 +35,26 @@ const WholesalerStore = () =>
         concept: {},
         async getList(filter) {
             this.isLoading = true
-            const list: IGetList = await connection.wholesaler(
-                {
-                    filter: filter ? filter : {},
-                    limit: this.pagination.pageSize,
-                    page: this.pagination.current,
-                    select: this.select,
-                    sort: { [this.sort.field]: this.sort.sorted },
-                },
-                'POST'
-            )
-            this.pagination.total = list.totalDocs
+            const list: IGetList = await connection({}, 'POST', '/_PATH')
             this.list = list.docs
             this.isLoading = false
             return true
         },
         async getById(id) {
             this.isLoading = true
-            const data: IGetList = await connection.wholesaler(
-                {
-                    filter: { _id: id },
-                    limit: 1,
-                    page: 1,
-                    select: '',
-                    sort: {},
-                },
-                'POST'
-            )
+            const data: IGetList = await connection({}, 'POST', '/_PATH')
             if (data.docs) this.item = data.docs[0]
             this.isLoading = false
             return true
         },
         async createUpdate(data: Partial<Wholesaler>) {
-            const res = await connection.wholesaler(
-                { filter: { _id: this.item._id }, data },
-                'PUT'
-            )
-            console.log('res: ', res)
+            const res = await connection({}, 'POST', '/_PATH')
             return true
         },
         async deleteById(id) {
-            const res = await connection.wholesaler({ _id: id }, 'DELETE')
-            console.log('res: ', res)
+            const res = await connection({}, 'POST', '/_PATH')
             return true
         },
-    })
+    }
 
 export default createContext(WholesalerStore())

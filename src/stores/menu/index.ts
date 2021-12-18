@@ -1,21 +1,20 @@
 import { createContext } from 'react'
-import { observable } from 'mobx'
 import { connection } from 'stores/connection'
-import { IMainMenu } from 'types/menu'
+import { MainMenu } from 'types/menu'
 
 export interface IMainMenuStore {
     isLoading: boolean
-    list: IMainMenu[]
+    list: MainMenu[]
     getList: () => Promise<void>
 }
 
 const mainMenuStore = () =>
-    observable<IMainMenuStore>({
-        list: [] as IMainMenu[],
+    <IMainMenuStore>{
+        list: [] as MainMenu[],
         isLoading: false,
         async getList() {
             return (this.list = await connection({}, 'POST', '/menu/list'))
         },
-    })
+    }
 
 export default createContext(mainMenuStore())
