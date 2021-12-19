@@ -50,7 +50,7 @@ const MobileMenu = ({ list, onSelect }: MainMenuProps) => {
                                 <Stack
                                     key={item.href}
                                     backgroundColor="orange.50"
-                                    width={400}
+                                    width={250}
                                     alignSelf="center"
                                     onClick={() => {
                                         onClose()

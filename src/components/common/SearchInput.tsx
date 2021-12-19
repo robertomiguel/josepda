@@ -17,12 +17,7 @@ interface Props {
 
 const SearchInput = ({ value, onChange, isLoading, placeHolder }: Props) => {
     return (
-        <Stack
-            spacing={4}
-            alignSelf="center"
-            position={{ sm: 'absolute', md: 'relative' }}
-            top={{ sm: '4', md: 'unset' }}
-        >
+        <Stack spacing={4} alignSelf="center">
             <InputGroup>
                 <InputLeftElement pointerEvents="none">
                     {!isLoading && (
